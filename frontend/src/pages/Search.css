@@ -1,0 +1,11 @@
+.searchResultsContainer {
+  width: 500px;
+  margin: 0 auto;  
+}
+
+@media (max-width: 600px) {
+  .searchResultsContainer {
+    width: 400px;
+    margin: 0 auto; 
+  }
+}

@@ -1,0 +1,23 @@
+.songMatrix {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: auto;
+  gap: 12px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.songMatrix .songCard {
+  height: 150px; 
+  display: flex;   
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow-wrap: break-word; 
+  hyphens: auto;        
+}
+
+.songMatrix .songCard .songTitle,
+.songMatrix .songCard .artists {
+  white-space: normal; 
+}

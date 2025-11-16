@@ -1,0 +1,101 @@
+.songCard {
+  position: relative;
+  border: 2px black solid;
+  border-radius: 8px;
+  padding: 8px;
+  text-align: left;
+  box-shadow: 0 0 10px 4px #efefef;
+  margin: 10px 10px 10px 10px;
+}
+
+.plusButton {
+  position: absolute;
+  right: 1em; 
+  top: 50%; 
+  transform: translateY(-50%); 
+  cursor: pointer;
+}
+
+.songTitle {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  color: #3d3d3d;
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.artists {
+  font-size: 0.8em;
+}
+
+.genres {
+  font-size: 0.8em;
+}
+
+.releaseYr {
+  font-size: 0.8em;
+}
+
+.dropdown {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.songSearchBar {
+  width: 275px; 
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.dropdownMenu {
+  position: relative;
+  width: 275px; 
+  background-color: #f7f5f5;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;   
+  border-radius: 5px; 
+  box-sizing: border-box;
+}
+
+.dropdownOption {
+  margin: 0;
+  padding: 0.5rem;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box; 
+  border-radius: 5px; 
+}
+
+.dropdownOption:hover {
+  background-color: #ede8e8;
+} 
+
+.popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #00000080;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popupContent {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 275px;
+}
+
