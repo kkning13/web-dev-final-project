@@ -3,6 +3,7 @@ import express, { Express } from "express";
 import cors from "cors";
 // import { WeatherResponse } from "@full-stack/types";
 // import fetch from "node-fetch";
+import { initialaddAllSongs } from "./firebaseUtils";
 
 const app: Express = express();
 
@@ -13,6 +14,18 @@ app.use(cors());
 app.use(express.json());
 
 // route outlines
+
+// temporary route to initially add all songs to database
+app.post("/initial-add-all-songs", async (req, res) => {
+    console.log("POST /initial-add-all-songs was called");
+    try {
+        const result = await initialaddAllSongs();
+        res.json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Something went wrong" });
+    }
+});
 
 // fetch all songs from database
 app.get("/songs", async (req, res) => {
