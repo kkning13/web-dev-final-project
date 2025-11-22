@@ -1,9 +1,14 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const firebaseApiKey = process.env.FIREBASE_API_KEY;
 
 // web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBPQbPPfNSQ3L5KJZAbz-anmDHWrtnlUFU",
+  apiKey: firebaseApiKey,
   authDomain: "song-browsing-app.firebaseapp.com",
   projectId: "song-browsing-app",
   storageBucket: "song-browsing-app.firebasestorage.app",
