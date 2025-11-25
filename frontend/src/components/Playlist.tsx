@@ -1,18 +1,28 @@
 import { useState } from "react";
 import PopupDetails from "../components/PopupDetails";
-import { SONGS } from "../constants/consts";
+import { Song } from "../utils";
 import SongCard from "./SongCard";
 import "./styles.css";
 
-const Playlist = () => {
+interface PlaylistProps {
+    songs: Song[];
+    onAddSong: (songId: string) => void;
+    onRemoveSong: (songId: string) => void;
+}
+
+const Playlist = ({ songs, onAddSong, onRemoveSong }: PlaylistProps) => {
     const [selectedSong, setSelectedSong] = useState<Song | null>(null);
 
     return (
         <div>
-            {SONGS.slice(0, 10).map((song) => (
+            {songs.slice(0, 10).map((song) => (
                 <SongCard 
                     song={song}
                     onClick={() => setSelectedSong(song)}
+                    showPlusButton={true} 
+                    isInPlaylist={true}
+                    onAddToPlaylist={onAddSong}
+                    onRemoveFromPlaylist={onRemoveSong}
                 />
             ))}
             <PopupDetails

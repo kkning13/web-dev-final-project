@@ -2,13 +2,34 @@ type SongCardProps = {
     song: Song;
     onClick: (song: Song) => void;
     showPlusButton?: boolean;
+    isInPlaylist?: boolean;
+    onAddToPlaylist?: (songId: string) => void;
+    onRemoveFromPlaylist?: (songId: string) => void;
 };
 
 // a function essentially destructuring our object (take out song)
-const SongCard = ({ song, onClick, showPlusButton }: SongCardProps) => {
+const SongCard = ({ 
+    song, 
+    onClick, 
+    showPlusButton, 
+    isInPlaylist = false,
+    onAddToPlaylist,
+    onRemoveFromPlaylist, 
+}: SongCardProps) => {
     if (!song) {
         return null;
     }
+
+    const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.stopPropagation(); // prevent card click
+        if (isInPlaylist) {
+            // e.stopPropagation(); // prevent card click
+            onRemoveFromPlaylist?.(song.id);
+        } else {
+            // e.stopPropagation(); // prevent card click
+            onAddToPlaylist?.(song.id);
+        }
+    };
 
     return (
         <div className="songCard" onClick={() => onClick(song)}>
@@ -20,7 +41,12 @@ const SongCard = ({ song, onClick, showPlusButton }: SongCardProps) => {
             </p>
 
             {showPlusButton && (
-                <button className="plusButton">+</button>
+                <button 
+                    className="plusButton"
+                    onClick={handleButtonClick}
+                >
+                    {isInPlaylist ? "-" : "+"}
+                </button>
             )}
         </div>
     );
