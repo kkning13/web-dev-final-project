@@ -1,147 +1,192 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  collection,
-  addDoc,
-  // getDocs,
-  // doc,
-  // deleteDoc, // preferred in latest versions of firebase
-  // updateDoc, // preferred in new versions of firebase
-} from "firebase/firestore";
 import { db } from "./firebase";
-// import { Song } from "./types";
-import { SONGS } from "./data/songs";
+import admin from "firebase-admin";
+import { Song } from "./types";
 
-export const initialaddAllSongs = async (): Promise<{
-  id: string | null; // last inserted song's ID
-  addedCount: number;
-}> => {
+// Get all songs
+export const fetchAllSongs = async (): Promise<
+  {
+    id: string;
+    artists: string[];
+    genres: string[];
+    releaseYr: number;
+    title: string;
+  }[]
+> => {
   try {
-    const songsCollection = collection(db, "songs");
+    const docRef = await db.collection("songs").get();
 
-    let count: number = 0;
-    let lastInsertedId: string | null = null;
+    return docRef.docs.map(doc => ({
+      id: doc.id,
+      artists: doc.data().artists,
+      genres: doc.data().genres,
+      releaseYr: doc.data().releaseYr,
+      title: doc.data().title,
+    }));
+  } catch (e) {
+    console.error("Error fetching songs:", e);
+    return [];
+  }
+};
 
-    for (const song of SONGS) {
-      const docRef = await addDoc(songsCollection, song);
-      lastInsertedId = docRef.id;
-      count++;
+// Get song by ID
+export const fetchSongById = async (id: string): Promise<
+{
+  id: string;
+  artists: string[];
+  genres: string[];
+  releaseYr: number;
+  title: string;
+} | null
+> => {
+  try {
+    const docRef = db.collection("songs").doc(id);
+    const snapshot = await docRef.get();
+
+    if(!snapshot.exists) {
+      return null;
     }
+
     return {
-      id: lastInsertedId,
-      addedCount: count,
+      id: snapshot.id,
+      artists: snapshot.data()?.artists,
+      genres: snapshot.data()?.genres,
+      releaseYr: snapshot.data()?.releaseYr,
+      title: snapshot.data()?.title,
     };
   } catch (e) {
-    console.error("Error adding all songs", e);
-    return {
-      id: null,
-      addedCount: 0,
-    }
+    console.error("Error fetching song by ID:", e);
+    return null;
   }
 }
 
-// // Get all semesters and their courses
-// export const fetchAllSemesters = async (): Promise<
-//   {
-//     name: string;
-//     id: string;
-//   }[]
-// > => {
+// Ensure user exists
+export const ensureUserExists = async (userId: string): Promise<boolean> => {
+  try {
+    const userRef = db.collection("users").doc(userId);
+    const snapshot = await userRef.get();
+
+    if(!snapshot.exists) {
+      await userRef.set({
+        userId,
+        playlistName: "My Playlist",
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+
+    return true;
+  } catch (e) {
+    console.error("Error ensuring user exists:", e);
+    return false;
+  }
+}
+
+// Get user's playlist
+export const fetchPlaylist = async (userId: string): Promise<Song[]> => {
+  try {
+    const playlistRef = db.collection(`users/${userId}/playlist`);
+    const playlistSnapshot = await playlistRef.get();
+
+    const songs: Song[] = [];
+
+    for (const doc of playlistSnapshot.docs) {
+      const songId = doc.id;
+      const songDoc = await db.collection("songs").doc(songId).get();
+      if (songDoc.exists) {
+        songs.push({
+          ...songDoc.data(),
+          id: songDoc.id,
+          addedAt: doc.data().addedAt || null,
+        } as Song);
+      }
+    }
+
+    return songs;
+  } catch (e) {
+    console.error("Error fetching user playlist:", e);
+    return [];
+  }
+}
+
+// Add song to user's playlist
+export const addSongToPlaylist = async (
+  userId: string,
+  songId: string
+): Promise<boolean> => {
+  try {
+    const songRef = db.collection("users").doc(userId).collection("playlist").doc(songId);
+
+    await songRef.set({
+      addedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return true;
+  } catch (e) {
+    console.error("Error adding song to playlist:", e);
+    return false;
+  }
+}
+
+// Remove song from user's playlist
+export const removeSongFromPlaylist = async (
+  userId: string,
+  songId: string
+): Promise<boolean> => {
+  try {
+    const songRef = db.collection("users").doc(userId).collection("playlist").doc(songId);
+
+    await songRef.delete();
+
+    return true;
+  } catch (e) {
+    console.error("Error removing song from playlist:", e);
+    return false;
+  }
+}
+
+// update user's playlist name
+export const updatePlaylistName = async (
+  userId: string,
+  newName: string
+): Promise<boolean> => {
+  try {
+    const userRef = db.collection("users").doc(userId);
+
+    await userRef.update({
+      playlistName: newName,
+    });
+
+    return true;
+  } catch (e) {
+    console.error("Error updating playlist name:", e);
+    return false;
+  }
+}
+
+// export const initialaddAllSongs = async (): Promise<{
+//   id: string | null; // last inserted song's ID
+//   addedCount: number;
+// }> => {
 //   try {
-//     const collectionRef = collection(db, "semester");
-//     const docRef = await getDocs(collectionRef);
-//     return docRef.docs.map(doc => ({
-//       id: doc.id,
-//       name: doc.data().name,
-//     }));
+//     const songsCollection = collection(db, "songs");
+
+//     let count: number = 0;
+//     let lastInsertedId: string | null = null;
+
+//     for (const song of SONGS) {
+//       const docRef = await addDoc(songsCollection, song);
+//       lastInsertedId = docRef.id;
+//       count++;
+//     }
+//     return {
+//       id: lastInsertedId,
+//       addedCount: count,
+//     };
 //   } catch (e) {
-//     console.error("Error fetching semesters", e);
-//     return [];
+//     console.error("Error adding all songs", e);
+//     return {
+//       id: null,
+//       addedCount: 0,
+//     }
 //   }
-// };
-
-// // Add a new semester
-// export const addSemester = async (name: string): Promise<string | null> => {
-//   try {
-//     const docRef = await addDoc(collection(db, "semesters"), {name});
-//     return docRef.id;
-//   } catch (e) {
-//     console.error("Error adding semester:", e);
-//     return null;
-//   }
-// };
-
-// // Get all courses for a semester
-// export const fetchCoursesForSemester = async (
-//   semesterId: string
-// ): Promise<Song[]> => {
-//   return [];
-// };
-
-// // Add a course to a semester
-// export const addCourseToSemester = async (
-//   semesterId: string,
-//   course: Song
-// ): Promise<string | null> => {
-//   try {
-//     const docRef = await addDoc(collection(db, 
-//       `semesters/${semesterId}/courses`),
-//       course
-//     );
-//     return docRef.id;
-//   } catch (e) {
-//     return null;
-//   }
-// };
-
-// // Delete a course from a semester
-// export const deleteCourseFromSemester = async (
-//   semesterId: string,
-//   courseId: string
-// ): Promise<boolean> => {
-//   return false;
-// };
-
-// // Update course notes
-// export const updateCourseNotes = async (
-//   semesterId: string,
-//   courseId: string,
-//   notes: string
-// ): Promise<boolean> => {
-//   return false;
-// };
-
-// // Update course details to show or hide
-// export const updateCourseDetails = async (
-//   semesterId: string,
-//   courseId: string,
-//   showDetails: boolean
-// ): Promise<boolean> => {
-//   return false;
-// };
-
-// // Add a course to the courses collection
-// export const addCourseToDB = async (course: any): Promise<string | null> => {
-//   try {
-//     const coursesCollection = collection(db, "courses");
-//     const docRef = await addDoc(coursesCollection, course);
-//     return docRef.id;
-//   } catch (error) {
-//     console.error("Error adding course to DB:", error);
-//     return null;
-//   }
-// };
-
-// // Get all courses from the courses collection
-// export const fetchAllCourses = async (): Promise<Partial<Song>[]> => {
-//   try {
-//     const coursesCollection = collection(db, "courses");
-//     const querySnapshot = await getDocs(coursesCollection);
-//     return querySnapshot.docs.map((doc) => ({
-//       id: doc.id,
-//       ...doc.data(),
-//     })) as Partial<Song>[];
-//   } catch (error) {
-//     console.error("Error fetching all courses:", error);
-//     return [];
-//   }
-// };
+// }

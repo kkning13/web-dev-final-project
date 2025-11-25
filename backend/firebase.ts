@@ -1,23 +1,16 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import admin from "firebase-admin";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const firebaseApiKey = process.env.FIREBASE_API_KEY;
+const SERVICE_ACCOUNT_PATH = "./service-account.json";
+const serviceAccount = require(SERVICE_ACCOUNT_PATH);
 
-// web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: firebaseApiKey,
-  authDomain: "song-browsing-app.firebaseapp.com",
-  projectId: "song-browsing-app",
-  storageBucket: "song-browsing-app.firebasestorage.app",
-  messagingSenderId: "528449180926",
-  appId: "1:528449180926:web:aa5608c257b3fdb1cec1af"
-};
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+}
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-// Initialize Firestore
-export const db = getFirestore(app);
+export const db = admin.firestore();
+export const auth = admin.auth();
