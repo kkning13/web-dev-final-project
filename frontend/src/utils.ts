@@ -84,12 +84,24 @@ export const removeSongFromPlaylist = async (songId: string): Promise<boolean> =
   }
 };
 
+/** Fetch the current user's playlist name */
+export const fetchPlaylistName = async (): Promise<string | null> => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await axios.get(`${API_BASE_URL}/playlist/name`, headers);
+    return response.data.playlistName; 
+  } catch (error) {
+    console.error("Error fetching playlist name:", error);
+    return null;
+  }
+};
+
 /** Update user's playlist name */
 export const updatePlaylistName = async (newName: string): Promise<boolean> => {
   try {
     const headers = await getAuthHeaders();
     await axios.put(
-      `${API_BASE_URL}/playlist`,
+      `${API_BASE_URL}/playlist/name`,
       { newName },
       headers
     );
