@@ -13,6 +13,7 @@ import {
     removeSongFromPlaylist,
     updatePlaylistName,
     ensureUserExists, 
+    fetchUser,
 } from "./firebaseUtils";
 
 const app: Express = express();
@@ -91,8 +92,23 @@ app.post("/playlist/:songId", async (req: AuthenticatedRequest, res) => {
     }
 });
 
+// fetch playlist name
+app.get("/playlist/name", async (req: AuthenticatedRequest, res) => {
+    try {
+        const uid = req.uid!;
+        const userDoc = await fetchUser(uid); 
+        if (!userDoc) {
+            console.error("User doc not found");
+            throw new Error("User doc missing");
+        }
+        res.status(200).json({ playlistName: userDoc.playlistName });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // update the current user's playlist name
-app.put("/playlist", async (req: AuthenticatedRequest, res) => {
+app.put("/playlist/name", async (req: AuthenticatedRequest, res) => {
     // console.log("PUT /playlist was called");
     try {
         const uid = req.uid!;

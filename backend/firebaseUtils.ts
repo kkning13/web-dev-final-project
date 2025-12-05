@@ -163,6 +163,14 @@ export const updatePlaylistName = async (
   }
 }
 
+// get the user (helper)
+export const fetchUser = async (userId: string) => {
+  const userRef = db.collection("users").doc(userId);
+  const snapshot = await userRef.get();
+  if (!snapshot.exists) throw new Error("User not found");
+  return snapshot.data();
+};
+
 // export const initialaddAllSongs = async (): Promise<{
 //   id: string | null; // last inserted song's ID
 //   addedCount: number;
